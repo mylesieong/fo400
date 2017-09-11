@@ -1,19 +1,10 @@
 package com.bcm.app;
 
 import java.io.IOException;
+import java.io.FileInputStream;
 
-import com.ibm.as400.access.AS400;
-import com.ibm.as400.access.AS400Text;
-import com.ibm.as400.access.AS400Exception;
-import com.ibm.as400.access.AS400File;
-import com.ibm.as400.access.AS400SecurityException;
-import com.ibm.as400.access.ErrorCompletingRequestException;
-import com.ibm.as400.access.FieldDescription;
-import com.ibm.as400.access.MemberDescription;
-import com.ibm.as400.access.MemberList;
-import com.ibm.as400.access.ObjectDoesNotExistException;
-import com.ibm.as400.access.Record;
-import com.ibm.as400.access.SequentialFile;
+import java.util.Properties;
+
 import com.ibm.as400.access.*;
 
 /**
@@ -23,16 +14,42 @@ import com.ibm.as400.access.*;
  */
 public class Fo400 {
 
-    private static String systemName="S657274B";
-    private static String userName="ZCSERVICE";
-    private static String password="ECIVRESCZ";
+    private final static String SYSTEM_NAME_PROPERTY = "SYSTEM_NAME";
+    private final static String USERNAME_PROPERTY = "USER";
+    private final static String PASSWORD_PROPERTY = "PASSWORD";
 
-    private static AS400 system = new AS400(systemName, userName , password);
+    private static String _systemName;
+    private static String _userName;
+    private static String _password;
+
+    private static AS400 _system;
+
+    static{
+
+        try{
+
+            FileInputStream configFile = new FileInputStream("config.properties");
+            Properties props = new Properties();
+            props.load(configFile);
+            _systemName = props.getProperty(SYSTEM_NAME_PROPERTY);
+            _userName = props.getProperty(USERNAME_PROPERTY);
+            _password = props.getProperty(PASSWORD_PROPERTY);
+            echo(_systemName);
+            echo(_userName);
+            echo(_password);
+            _system = new AS400(_systemName, _userName , _password);
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+    }
 
     public static void main( String[] args ){
 
         String library = "YMYLES1";
         String sourceFile = "QCLSRC";
+        String member = "DSFSTTCL";
 
         try{
             MemberDescription[] members = listMembers(library, sourceFile);
@@ -46,7 +63,7 @@ public class Fo400 {
 
     private static MemberDescription[] listMembers(String lib, String file) throws Exception{
         echo("Members:");
-        MemberList memberList = new MemberList(system, lib, file);
+        MemberList memberList = new MemberList(_system, lib, file);
         memberList.load();
         MemberDescription[] result = memberList.getMemberDescriptions();
         for (MemberDescription memberDescription : result) {
@@ -56,7 +73,7 @@ public class Fo400 {
     }
 
     private static String getMemberAsString(MemberDescription memberDescription) throws Exception {
-        AS400File file = new SequentialFile(system, memberDescription.getPath());
+        AS400File file = new SequentialFile(_system, memberDescription.getPath());
         StringBuilder result = new StringBuilder();
         file.setRecordFormat();
         listFieldDescriptions(file);
