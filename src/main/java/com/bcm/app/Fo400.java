@@ -37,28 +37,26 @@ public class Fo400 {
             _system = new AS400(_systemName, _userName , _password);
 
         }catch(Exception e){
+
             e.printStackTrace();
             echo("Initiate parameter incorrect! Please check the config file.");
+
         }
 
     }
 
     public static void main( String[] args ){
 
-        String library = "YMYLES1";
-        String sourceFile = "QCLSRC";
-        String memberName = "DSFSTTCL";
+        FileMemberId id = new FileMemberId(args[0]);
+        String library = id.getLibrary();
+        String sourceFile = id.getFile();
+        String memberName = id.getMember();
 
         try{
 
             MemberDescription target = new MemberDescription(_system, library, sourceFile, memberName);
-
-            if (target == null){
-                throw new IOException("No such file member");
-            }else{
-                String memberAsString = getMemberAsString(target);
-                echo(memberAsString);
-            }
+            String memberAsString = getMemberAsString(target);
+            echo(memberAsString);
 
         }catch (Exception e){
 
@@ -102,6 +100,33 @@ public class Fo400 {
     
     private static void echo(String msg){
         System.out.println(msg);
+    }
+
+    static class FileMemberId {
+
+        String _library;
+        String _file;
+        String _member;
+
+        FileMemberId(String s){
+            String[] ss = s.split("/");
+            _library = ss[0];
+            _file = ss[1];
+            _member = ss[2];
+        }
+
+        String getLibrary(){
+            return _library;
+        }
+
+        String getFile(){
+            return _file;
+        }
+
+        String getMember(){
+            return _member;
+        }
+
     }
 
 }
