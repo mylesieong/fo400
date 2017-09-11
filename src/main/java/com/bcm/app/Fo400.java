@@ -31,54 +31,50 @@ public class Fo400 {
 
     public static void main( String[] args ){
 
-        String sysId = "12153524";
-        String sysName = "";
-        String sysStatus = "";
-        String sysReturnCode = "";
+        String library = "YMYLES1";
+        String sourceFile = "QCLSRC";
 
         try{
-            String programName="/QSYS.LIB/YMYLES1.LIB/DSNTEINQCL.PGM";
-            /* Prepare parameter list */
-            ProgramParameter[] parmList= new ProgramParameter[4];
-            AS400Text idText = new AS400Text(8);
-            parmList[0] = new ProgramParameter(idText.toBytes(sysId));
-            parmList[1] = new ProgramParameter(80);
-            parmList[2] = new ProgramParameter(10);
-            parmList[3] = new ProgramParameter(1);
-    
-            ProgramCall program = new ProgramCall(system);
-            program.setProgram(programName, parmList);
-
-            if (program.run()!= true){
-                AS400Message[] messagelist = program.getMessageList();
-                for (int i = 0; i < messagelist.length; ++i){
-                    System.out.println(messagelist[i]);
-                }
-            }else{
-                // Get the chinese name with cp937 encoding
-                sysName = new String(parmList[1].getOutputData(), "Cp937");
-                // Get the english status with default encoding cp1047
-                AS400Text statusText = new AS400Text(10);
-                sysStatus = (String)statusText.toObject(
-                parmList[2].getOutputData());
-                // Get the return code with default encoding cp1047
-                AS400Text returnCodeText = new AS400Text(1);
-                sysReturnCode=(String)returnCodeText.toObject(
-                parmList[3].getOutputData());
-                
-            }
-            
-        }catch(Exception e){
+            MemberDescription[] members = listMembers(library, sourceFile);
+            String memberAsString = getMemberAsString(members[0]);
+            echo(memberAsString);
+        }catch (Exception e){
             e.printStackTrace();
         }
 
-        // Output result
-        echo(sysName);
-        echo(sysStatus);
-        echo(sysReturnCode);
-
     }
 
+    private static MemberDescription[] listMembers(String lib, String file) throws Exception{
+        echo("Members:");
+        MemberList memberList = new MemberList(system, lib, file);
+        memberList.load();
+        MemberDescription[] result = memberList.getMemberDescriptions();
+        for (MemberDescription memberDescription : result) {
+            echo(memberDescription.getPath());
+        }
+        return result;
+    }
+
+    private static String getMemberAsString(MemberDescription memberDescription) throws Exception {
+        AS400File file = new SequentialFile(system, memberDescription.getPath());
+        StringBuilder result = new StringBuilder();
+        file.setRecordFormat();
+        listFieldDescriptions(file);
+        Record[] records = file.readAll();
+        for (Record record : records) {
+            result.append(record.toString());
+            result.append(System.lineSeparator());
+        }
+        return result.toString();
+    }
+
+    private static void listFieldDescriptions(AS400File file) {
+        echo("Fields:");
+        for (FieldDescription description : file.getRecordFormat().getFieldDescriptions()) {
+            echo(description.getFieldName());
+        }
+    }
+    
     private static void echo(String msg){
         System.out.println("ECHO>>>" + msg);
     }
