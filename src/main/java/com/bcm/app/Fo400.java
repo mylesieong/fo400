@@ -34,13 +34,11 @@ public class Fo400 {
             _systemName = props.getProperty(SYSTEM_NAME_PROPERTY);
             _userName = props.getProperty(USERNAME_PROPERTY);
             _password = props.getProperty(PASSWORD_PROPERTY);
-            echo(_systemName);
-            echo(_userName);
-            echo(_password);
             _system = new AS400(_systemName, _userName , _password);
 
         }catch(Exception e){
             e.printStackTrace();
+            echo("Initiate parameter incorrect! Please check the config file.");
         }
 
     }
@@ -49,14 +47,24 @@ public class Fo400 {
 
         String library = "YMYLES1";
         String sourceFile = "QCLSRC";
-        String member = "DSFSTTCL";
+        String memberName = "DSFSTTCL";
 
         try{
-            MemberDescription[] members = listMembers(library, sourceFile);
-            String memberAsString = getMemberAsString(members[0]);
-            echo(memberAsString);
+
+            MemberDescription target = new MemberDescription(_system, library, sourceFile, memberName);
+
+            if (target == null){
+                throw new IOException("No such file member");
+            }else{
+                String memberAsString = getMemberAsString(target);
+                echo(memberAsString);
+            }
+
         }catch (Exception e){
+
             e.printStackTrace();
+            echo("Cannot find this file member!");
+
         }
 
     }
@@ -76,7 +84,7 @@ public class Fo400 {
         AS400File file = new SequentialFile(_system, memberDescription.getPath());
         StringBuilder result = new StringBuilder();
         file.setRecordFormat();
-        listFieldDescriptions(file);
+        //listFieldDescriptions(file);
         Record[] records = file.readAll();
         for (Record record : records) {
             result.append(record.toString());
@@ -93,7 +101,7 @@ public class Fo400 {
     }
     
     private static void echo(String msg){
-        System.out.println("ECHO>>>" + msg);
+        System.out.println(msg);
     }
 
 }
