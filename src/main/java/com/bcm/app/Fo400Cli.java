@@ -29,7 +29,8 @@ public class Fo400Cli {
             String memberName = ar.getMember();
              
             // Load property file 
-            FileInputStream configFile = new FileInputStream("config.properties");
+            String configName = System.getenv("FO400") + File.separator + "config.properties";
+            FileInputStream configFile = new FileInputStream(configName);
             Properties props = new Properties();
             props.load(configFile);
             
