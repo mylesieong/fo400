@@ -1,15 +1,12 @@
 package com.bcm.app;
 
-import java.io.IOException;
-import java.io.FileInputStream;
-
 import java.util.Properties;
 
 import com.ibm.as400.access.*;
 
 /**
- * Class Fo400 is the command line class of fo400 project. It
- * takes input parameters and launch jtopen utililies.
+ * Class Fo400 is the utility class that proxy JTOpen api power
+ * into a friendly and simple way.
  *
  */
 public class Fo400 {
@@ -24,108 +21,47 @@ public class Fo400 {
 
     private static AS400 _system;
 
-    static{
+    public Fo400(Properties props) throws Exception{
 
-        try{
-
-            FileInputStream configFile = new FileInputStream("config.properties");
-            Properties props = new Properties();
-            props.load(configFile);
-            _systemName = props.getProperty(SYSTEM_NAME_PROPERTY);
-            _userName = props.getProperty(USERNAME_PROPERTY);
-            _password = props.getProperty(PASSWORD_PROPERTY);
-            _system = new AS400(_systemName, _userName , _password);
-
-        }catch(Exception e){
-
-            e.printStackTrace();
-            echo("Initiate parameter incorrect! Please check the config file.");
-
-        }
+        _systemName = props.getProperty(SYSTEM_NAME_PROPERTY);
+        _userName = props.getProperty(USERNAME_PROPERTY);
+        _password = props.getProperty(PASSWORD_PROPERTY);
+        _system = new AS400(_systemName, _userName , _password);
 
     }
 
-    public static void main( String[] args ){
-
-        FileMemberId id = new FileMemberId(args[0]);
-        String library = id.getLibrary();
-        String sourceFile = id.getFile();
-        String memberName = id.getMember();
-
-        try{
-
-            MemberDescription target = new MemberDescription(_system, library, sourceFile, memberName);
-            String memberAsString = getMemberAsString(target);
-            echo(memberAsString);
-
-        }catch (Exception e){
-
-            e.printStackTrace();
-            echo("Cannot find this file member!");
-
-        }
-
+    public AS400 getSystem(){
+        return _system;
     }
 
-    private static MemberDescription[] listMembers(String lib, String file) throws Exception{
-        echo("Members:");
+    public MemberDescription[] getMembers(String lib, String file) throws Exception{
+
         MemberList memberList = new MemberList(_system, lib, file);
         memberList.load();
         MemberDescription[] result = memberList.getMemberDescriptions();
-        for (MemberDescription memberDescription : result) {
-            echo(memberDescription.getPath());
-        }
         return result;
+
     }
 
-    private static String getMemberAsString(MemberDescription memberDescription) throws Exception {
-        AS400File file = new SequentialFile(_system, memberDescription.getPath());
+    public MemberDescription getMember(String lib, String file, String mbr){
+        return new MemberDescription(_system, lib, file, mbr);
+    }
+
+    public String getMemberContent(String lib, String file, String mbr) throws Exception {
+
         StringBuilder result = new StringBuilder();
-        file.setRecordFormat();
-        //listFieldDescriptions(file);
-        Record[] records = file.readAll();
+
+        MemberDescription md = getMember(lib, file, mbr);
+        AS400File asf = new SequentialFile(_system, md.getPath());
+        asf.setRecordFormat();
+        Record[] records = asf.readAll();
+
         for (Record record : records) {
             result.append(record.toString());
             result.append(System.lineSeparator());
         }
+
         return result.toString();
-    }
-
-    private static void listFieldDescriptions(AS400File file) {
-        echo("Fields:");
-        for (FieldDescription description : file.getRecordFormat().getFieldDescriptions()) {
-            echo(description.getFieldName());
-        }
-    }
-    
-    private static void echo(String msg){
-        System.out.println(msg);
-    }
-
-    static class FileMemberId {
-
-        String _library;
-        String _file;
-        String _member;
-
-        FileMemberId(String s){
-            String[] ss = s.split("/");
-            _library = ss[0];
-            _file = ss[1];
-            _member = ss[2];
-        }
-
-        String getLibrary(){
-            return _library;
-        }
-
-        String getFile(){
-            return _file;
-        }
-
-        String getMember(){
-            return _member;
-        }
 
     }
 
