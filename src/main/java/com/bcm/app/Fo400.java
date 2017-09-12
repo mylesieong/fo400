@@ -65,9 +65,10 @@ public class Fo400 {
 
     }
 
-    public String getMemberType(String lib, String file, String mbr){
-        // TODO
-        return null;
+    public String getMemberType(String lib, String file, String mbr)throws Exception{
+        MemberDescription mb = getMember(lib, file, mbr);
+        String type = (String)mb.getValue(MemberDescription.SOURCE_TYPE);
+        return type;
     }
 
 }

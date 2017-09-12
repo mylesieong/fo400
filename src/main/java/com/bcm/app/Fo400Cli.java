@@ -63,8 +63,8 @@ public class Fo400Cli {
         }finally {
 
             try{
-                if (fw != null){fw.close();}
                 if (bw != null){bw.close();}
+                if (fw != null){fw.close();}
             }catch(Exception ee){
                 ee.printStackTrace();
             }
@@ -77,19 +77,50 @@ public class Fo400Cli {
         System.out.println(msg);
     }
 
+    /**
+     * Arguments should be like below example, for other cases,
+     * feature is not garranteed:
+     * $ fo400 ZXXXLIB/QXXXSRC/XXXPGM
+     * $ fo400 -f ZXXXLIB/QXXXSRC/XXXPGM
+     *
+     */
     private static class Fo400CliArgument {
 
         private String _library;
         private String _file;
         private String _member;
+        private boolean _hasSaveLoc;
 
-        Fo400CliArgument(String[] args){
-            // TODO
-            
-            String[] ss = args[0].split("/");
-            _library = ss[0];
-            _file = ss[1];
-            _member = ss[2];
+        Fo400CliArgument(String[] args)throws Exception{
+
+            if (args.length > 2){
+
+                throw new IllegalArgumentException();
+
+            }else{
+
+                if (args.length == 1){
+                    String[] s = args[0].split("/");
+                    _library = s[0];
+                    _file = s[1];
+                    _member = s[2];
+                    _hasSaveLoc = false;
+                }
+
+                if (args.length == 2 ){
+                    if (args[0].compareTo("-f") != 0){
+                        throw new IllegalArgumentException();
+                    }else{
+                        String[] s = args[1].split("/");
+                        _library = s[0];
+                        _file = s[1];
+                        _member = s[2];
+                        _hasSaveLoc = true;
+                    }
+                }
+
+            }
+
         }
 
         String getLibrary(){
@@ -105,13 +136,12 @@ public class Fo400Cli {
         }
 
         boolean hasSaveLoc(){
-            // TODO
-            return false;
+            return _hasSaveLoc;
         }
 
         String getSaveLoc(){
-            // TODO
-            return null;
+            // TODO Default as current folder
+            return ".";
         }
 
     }
