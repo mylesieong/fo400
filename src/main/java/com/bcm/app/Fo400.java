@@ -65,4 +65,9 @@ public class Fo400 {
 
     }
 
+    public String getMemberType(String lib, String file, String mbr){
+        // TODO
+        return null;
+    }
+
 }

@@ -2,6 +2,10 @@ package com.bcm.app;
 
 import java.io.IOException;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.File;
+
 import java.util.Properties;
 
 /**
@@ -13,14 +17,17 @@ public class Fo400Cli {
 
     public static void main( String[] args ){
 
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+
         try{
 
             // Parse input parameter
-            Fo400CliArgument ar = new Fo400CliArgument(args[0]);
+            Fo400CliArgument ar = new Fo400CliArgument(args);
             String library = ar.getLibrary();
             String sourceFile = ar.getFile();
             String memberName = ar.getMember();
-
+             
             // Load property file 
             FileInputStream configFile = new FileInputStream("config.properties");
             Properties props = new Properties();
@@ -29,12 +36,38 @@ public class Fo400Cli {
             // Create Fo400 object and call for its power
             Fo400 fo400 = new Fo400(props);
             String memberContent = fo400.getMemberContent(library, sourceFile, memberName);
-            echo(memberContent);
+
+            if (!ar.hasSaveLoc()){
+                echo(memberContent);
+            }else{
+
+                String filename = memberName;
+                String filetype = fo400.getMemberType(library, sourceFile, memberName);
+                fw = new FileWriter(ar.getSaveLoc() + File.separator + 
+                        filename + "." + filetype);
+                bw = new BufferedWriter(fw);
+                bw.write(memberContent);
+                echo("Save complete.");
+
+            }
 
         }catch(Exception e){
 
             e.printStackTrace();
-            echo("Error. Reason may be:\n* Initiate parameter incorrect\n* Config file corrupted\n* Internet connection malfunction\n* Cannot find this file member");
+            echo("Error. Reason may be:" + System.lineSeparator() + 
+                    "* Initiate parameter incorrect" + System.lineSeparator() +
+                    "* Config file corrupted" + System.lineSeparator() +
+                    "* Internet connection malfunction" + System.lineSeparator() +
+                    "* Cannot find this file member");
+
+        }finally {
+
+            try{
+                if (fw != null){fw.close();}
+                if (bw != null){bw.close();}
+            }catch(Exception ee){
+                ee.printStackTrace();
+            }
 
         }
 
@@ -50,8 +83,10 @@ public class Fo400Cli {
         private String _file;
         private String _member;
 
-        Fo400CliArgument(String s){
-            String[] ss = s.split("/");
+        Fo400CliArgument(String[] args){
+            // TODO
+            
+            String[] ss = args[0].split("/");
             _library = ss[0];
             _file = ss[1];
             _member = ss[2];
@@ -67,6 +102,16 @@ public class Fo400Cli {
 
         String getMember(){
             return _member;
+        }
+
+        boolean hasSaveLoc(){
+            // TODO
+            return false;
+        }
+
+        String getSaveLoc(){
+            // TODO
+            return null;
         }
 
     }
