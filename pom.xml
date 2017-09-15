@@ -33,6 +33,7 @@
   </dependencies>
 
   <build>
+  
     <plugins>
         
       <!-- build shaded jar-->
@@ -100,6 +101,19 @@
            </execution>
          </executions>
       </plugin>
+      
+      <!-- javadoc generation -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.0-M1</version>
+        <configuration>
+            <reportOutputDirectory>
+                ${project.reporting.outputDirectory}/../..
+            </reportOutputDirectory>
+        </configuration>
+      </plugin>
+        
         
     </plugins>
   </build>
