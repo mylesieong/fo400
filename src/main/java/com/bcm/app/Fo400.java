@@ -9,10 +9,10 @@ import com.ibm.as400.access.*;
  * into a simple and stupid way.
  *
  * Usage is as simple as create an object and call the method:
- * <code>Fo400 foo = new Fo400(props);</code>
- * <code>String lib = "ZCHQLIB";</code>
- * <code>String file = "QCQRSRC";</code>
- * <code>String mbr = "CQRIAPP";</code>
+ * <code>Fo400 foo = new Fo400(props);</code><br>
+ * <code>String lib = "ZCHQLIB";</code><br>
+ * <code>String file = "QCQRSRC";</code><br>
+ * <code>String mbr = "CQRIAPP";</code><br>
  * <code>String code = foo.getMemberContent(lib, file, mbr); </code>
  *
  */
@@ -32,8 +32,8 @@ public class Fo400 {
      * Constructor Fo400(Properties) is the only constructor of this proxy
      * class.
      *
-     * @param Properties the property file that contains system name and user
-     * token
+     * @param props A Properties object contains system name and user token
+     * @throws Exception includes many possible exception
      */
     public Fo400(Properties props) throws Exception{
 
@@ -59,9 +59,9 @@ public class Fo400 {
      * name. It then returns the MemberDescription object that contains
      * meta data of file member.
      *
-     * @param String library name w/o suffix. e.g. ZCHQLIB
-     * @param String file name w/o suffix. e.g. QCQRSRC
-     * @param String member name w/o suffix. e.g. CQRIAPP
+     * @param lib library name 
+     * @param file file name
+     * @param mbr member name
      * @return MemberDescription metadata of a file member
      */
     public MemberDescription getMember(String lib, String file, String mbr){
@@ -72,9 +72,10 @@ public class Fo400 {
      * returns a list of MemberDescription objects which represent every
      * member in file respectively.
      *
-     * @param String lib name
-     * @param String file name
+     * @param lib library name 
+     * @param file file name
      * @return MemberDescription[]
+     * @throws Exception includes many possible exception
      */ 
     public MemberDescription[] getMembers(String lib, String file) throws Exception{
 
@@ -90,10 +91,11 @@ public class Fo400 {
      * name. It then returns members' content as a string to client. Please
      * note that it works for both pf-src member and pf-dta member.
      *
-     * @param String library name
-     * @param String file name
-     * @param String member name
+     * @param lib library name 
+     * @param file file name
+     * @param mbr member name
      * @return String member content
+     * @throws Exception includes many possible exception
      */
     public String getMemberContent(String lib, String file, String mbr) throws Exception {
 
@@ -117,10 +119,11 @@ public class Fo400 {
      * Method getMemberType(...) accepts lib name, file name and member
      * name. It then returns type of the member. 
      *
-     * @param String library name
-     * @param String file name
-     * @param String member name
+     * @param lib library name 
+     * @param file file name
+     * @param mbr member name
      * @return String member type. e.g. RPGLE, CLP
+     * @throws Exception includes many possible exception
      */
     public String getMemberType(String lib, String file, String mbr)throws Exception{
         MemberDescription mb = getMember(lib, file, mbr);
