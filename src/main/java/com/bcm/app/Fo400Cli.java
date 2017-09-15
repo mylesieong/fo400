@@ -79,7 +79,8 @@ public class Fo400Cli {
     }
 
     /**
-     * Arguments should be like below example, for other cases,
+     * Inner Class Fo400CliArgument is argument object abstraction in fo400
+     * context. Arguments should be like below example, for other cases,
      * feature is not garranteed:
      * $ fo400 ZXXXLIB/QXXXSRC/XXXPGM
      * $ fo400 -f ZXXXLIB/QXXXSRC/XXXPGM
